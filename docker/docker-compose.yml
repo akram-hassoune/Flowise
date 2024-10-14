@@ -10,26 +10,11 @@ services:
       - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE:-myencryptionkey}
       - DATABASE_TYPE=postgres
       - DATABASE_URL=postgresql://${POSTGRES_USER:-flowise}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-flowisedb}
-      # Ajout d'une variable d'environnement pour le health check
-      - HEALTH_CHECK_PATH=/health
     ports:
       - '${PORT:-3000}:${PORT:-3000}'
     volumes:
       - ~/.flowise:/root/.flowise
-    entrypoint: /bin/sh -c "
-      echo 'Adding health check endpoint...' &&
-      echo '#!/bin/sh' > /health.sh &&
-      echo 'echo \"HTTP/1.1 200 OK\nContent-Type: text/plain\n\nOK\"' >> /health.sh &&
-      chmod +x /health.sh &&
-      (nc -l -p 8080 -e /health.sh &) &&
-      sleep 3;
-      flowise start
-      "
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    entrypoint: /bin/sh -c "sleep 3; flowise start"
     depends_on:
       - postgres
 
@@ -42,11 +27,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-flowisedb}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flowise}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 volumes:
   postgres_data:
