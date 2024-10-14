@@ -1,32 +1,33 @@
-version: '3.8'
-
+version: '3.1'
 services:
-
   flowise:
-    image: flowiseai/flowise:latest
-    ports:
-      - "3000:3000"
+    image: flowiseai/flowise
+    restart: always
     environment:
+      - PORT=${PORT:-3000}
+      - FLOWISE_USERNAME=${FLOWISE_USERNAME:-user}
+      - FLOWISE_PASSWORD=${FLOWISE_PASSWORD:-password}
+      - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE:-myencryptionkey}
       - DATABASE_TYPE=postgres
-      - DATABASE_URL=postgresql://flowise:password@postgres:5432/flowisedb
-      - PORT=3000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-flowise}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-flowisedb}
+    ports:
+      - '${PORT:-3000}:${PORT:-3000}'
+    volumes:
+      - ~/.flowise:/root/.flowise
+    entrypoint: /bin/sh -c "sleep 3; flowise start"
     depends_on:
       - postgres
-    restart: unless-stopped
 
   postgres:
     image: postgres:16-alpine
-    ports:
-      - "5432:5432"
+    restart: always
     environment:
-      - POSTGRES_USER=flowise
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=flowisedb
+      - POSTGRES_USER=${POSTGRES_USER:-flowise}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${POSTGRES_DB:-flowisedb}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
 
 volumes:
   postgres_data:
     driver: local
- 
