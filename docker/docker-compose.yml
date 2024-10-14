@@ -8,26 +8,8 @@ services:
       - FLOWISE_USERNAME=${FLOWISE_USERNAME:-user}
       - FLOWISE_PASSWORD=${FLOWISE_PASSWORD:-password}
       - FLOWISE_SECRETKEY_OVERWRITE=${FLOWISE_SECRETKEY_OVERWRITE:-myencryptionkey}
-      - DATABASE_TYPE=postgres
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-flowise}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-flowisedb}
     ports:
-      - '${PORT:-3000}:${PORT:-3000}'
+      - '${PORT:-3000}:${PORT:-3001}'
     volumes:
       - ~/.flowise:/root/.flowise
     entrypoint: /bin/sh -c "sleep 3; flowise start"
-    depends_on:
-      - postgres
-
-  postgres:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-flowise}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_DB=${POSTGRES_DB:-flowisedb}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-    driver: local
